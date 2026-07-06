@@ -131,6 +131,7 @@
             document.getElementById("rate").value = rate.toFixed(2);
             document.getElementById("discount").value = discount.toFixed(2);
             document.getElementById("total").value = finalBill.toFixed(2);
+            toggleFormState(true);
 
             const scriptURL = "https://script.google.com/macros/s/AKfycbzMu9n3JjpLl8O5Z1310uHRI0dt9Mdwx6ymJNw3dzoSXFFNnCY_N86rDvrxrlpQ_VSN/exec";
             const formData = new FormData(this);
@@ -147,11 +148,13 @@
                     } else {
                         console.error('Backend Error:', data.error);
                         alert("Error saving data: " + data.error);
+                        toggleFormState(false);
                     }
                 })
                 .catch(error => {
                     console.error('Network Error!', error.message);
                     alert("Connection error while syncing to database.");
+                    toggleFormState(false);
                 });
         });
 
@@ -161,6 +164,9 @@
             document.getElementById("statement").style.display = "none";
             document.getElementById("customerName").focus();
         });
+        toggleFormState(false);
+            
+            document.getElementById("customerName").focus();
     </script>
 
 </body>
