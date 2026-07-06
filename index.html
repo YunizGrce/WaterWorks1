@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Water Works</title>
+
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>💧 Water Works</h1>
+
+        <!--FORM -->
+        <form id="waterForm">
+            <div class="form-group">
+                <label for="customerName">Customer Name</label>
+
+                <!--VALIDATED LETTERS AND SPACES ONLY FOR NAME-->
+                <input type="text" id="customerName" name="customerName" pattern="^[A-Za-z\s]+$"
+                    title="Name must contain letters and spaces only." required>
+            </div>
+            <div class="form-group">
+                <label for="consumption">Water Consumption (m³)</label>
+
+                <!--VALIDATED NUMBERS ONLY FOR METRIC-->
+                <input type="number" id="consumption" name="consumption" min="0.01" step="0.01" required>
+            </div>
+
+            <div class="form-group">
+                <label for="customerType">Customer Type</label>
+                <select id="customerType" name="customerType" required>
+                    <option value="">Select Type</option>
+                    <option value="Regular">Regular</option>
+                    <option value="Senior Citizen">Senior Citizen</option>
+                    <option value="Solo Parent">Solo Parent</option>
+                </select>
+            </div>
+
+            <input type="hidden" id="transactionId" name="transactionId">
+            <input type="hidden" id="rate" name="rate">
+            <input type="hidden" id="discount" name="discount">
+            <input type="hidden" id="total" name="total">
+
+            <button type="submit" id="submitBtn">Generate Bill</button>
+        </form>
+
+        <div class="counter">
+            Transactions Processed: <span id="count">0</span>
+        </div>
+
+        <div class="statement" id="statement">
+            <h2>Billing Statement</h2>
+            <p><strong>Name:</strong> <span id="sName"></span></p>
+            <p><strong>Consumption:</strong> <span id="sConsumption"></span></p>
+            <p><strong>Customer Type:</strong> <span id="sType"></span></p>
+            <p><strong>Rate per m³:</strong> <span>₱<span id="sRate"></span></span></p>
+            <p><strong>Discount:</strong> <span>₱<span id="sDiscount"></span></span></p>
+            <p><strong>Total Bill:</strong> <span>₱<span id="sTotal"></span></span></p>
+
+            <!--RESET BUTTON FOR NEW TRANSACTIONS-->
+            <button type="button" class="btn-reset" id="resetBtn">New Transaction</button>
+        </div>
+    </div>
+
+    <script>
+        let transactionCount = 0;
+
+        document.getElementById("waterForm").addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            // DOM METHODS
+            const name = document.getElementById("customerName").value.trim();
+            const consumption = Number(document.getElementById("consumption").value);
+            const type = document.getElementById("customerType").value;
+
+            // INPUT VALIDATION
+            if (name === "" || consumption <= 0 || type === "") {
+                alert("Please complete all fields with valid inputs.");
+                return;
+            }
+
+            // CONDITIONAL STATEMENT: IF ELSE
+            let rate = 0;
+            if (consumption >= 1 && consumption <= 20) {
+                rate = 25.00;
+            } else if (consumption >= 21 && consumption <= 40) {
+                rate = 35.00;
+            } else if (consumption >= 41 && consumption <= 60) {
+                rate = 45.00;
+            } else if (consumption > 60) {
+                rate = 60.00;
+            }
+
+            let totalAmount = consumption * rate;
+            let discountPercent = 0;
+
+            // CONDITIONAL STATEMENT: SWITCH
+            switch (type) {
+                case "Senior Citizen":
+                    discountPercent = 25;
+                    break;
+                case "Solo Parent":
+                    discountPercent = 15;
+                    break;
+                default:
+                    discountPercent = 0;
+            }
+
+            let discount = totalAmount * (discountPercent / 100);
+            let finalBill = totalAmount - discount;
+
+            // LOOP
+            for (let i = 1; i <= 1; i++) {
+                console.log("Processing billing details sequentially...");
+            }
+
+            transactionCount++;
+            document.getElementById("count").textContent = transactionCount;
+            document.getElementById("statement").style.display = "block";
+            document.getElementById("sName").textContent = name;
+            document.getElementById("sConsumption").textContent = consumption + " m³";
+            document.getElementById("sType").textContent = type;
+            document.getElementById("sRate").textContent = rate.toFixed(2);
+            document.getElementById("sDiscount").textContent = discount.toFixed(2);
+            document.getElementById("sTotal").textContent = finalBill.toFixed(2);
+            document.getElementById("transactionId").value = transactionCount;
+            document.getElementById("rate").value = rate.toFixed(2);
+            document.getElementById("discount").value = discount.toFixed(2);
+            document.getElementById("total").value = finalBill.toFixed(2);
+
+            const scriptURL = "https://script.google.com/macros/s/AKfycbzMu9n3JjpLl8O5Z1310uHRI0dt9Mdwx6ymJNw3dzoSXFFNnCY_N86rDvrxrlpQ_VSN/exec";
+            const formData = new FormData(this);
+
+            fetch(scriptURL, {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.result === "success") {
+                        console.log('Success!', data);
+                        alert("Data successfully saved!");
+                    } else {
+                        console.error('Backend Error:', data.error);
+                        alert("Error saving data: " + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Network Error!', error.message);
+                    alert("Connection error while syncing to database.");
+                });
+        });
+
+        //RESET BUTTON
+        document.getElementById("resetBtn").addEventListener("click", function () {
+            document.getElementById("waterForm").reset();
+            document.getElementById("statement").style.display = "none";
+            document.getElementById("customerName").focus();
+        });
+    </script>
+
+</body>
+
+</html>
